@@ -11,9 +11,23 @@
 
     /* ── Format mapping ──────────────────────────────────────────────── */
     const CONVERSIONS = {
-        docx: [{ value: "pdf", label: "PDF", icon: "📄", desc: "Portable Document" }],
-        pdf: [{ value: "docx", label: "DOCX", icon: "📝", desc: "Word Document" }],
-        html: [{ value: "pdf", label: "PDF", icon: "📄", desc: "Portable Document" }],
+        docx: [
+            { value: "html", label: "HTML", icon: "🌐", desc: "Standalone Web Document" },
+            { value: "md", label: "Markdown", icon: "✍️", desc: "Plain Text Markdown" },
+            { value: "pdf", label: "PDF", icon: "📄", desc: "Portable Document" },
+        ],
+        pdf: [
+            { value: "doc", label: "DOC", icon: "📘", desc: "Legacy Word Document" },
+            { value: "docx", label: "DOCX", icon: "📝", desc: "Word Document" },
+            { value: "html", label: "HTML", icon: "🌐", desc: "Web Document" },
+            { value: "md", label: "Markdown", icon: "✍️", desc: "Plain Text Markdown" },
+        ],
+        html: [
+            { value: "md", label: "Markdown", icon: "✍️", desc: "Plain Text Markdown" },
+            { value: "pdf", label: "PDF", icon: "📄", desc: "Portable Document" },
+        ],
+        md: [{ value: "pdf", label: "PDF", icon: "📄", desc: "Portable Document" }],
+        markdown: [{ value: "pdf", label: "PDF", icon: "📄", desc: "Portable Document" }],
     };
 
     /* ── DOM refs ─────────────────────────────────────────────────────── */
@@ -81,7 +95,7 @@
         const ext = getExtension(file.name);
 
         if (!CONVERSIONS[ext]) {
-            showError(`Unsupported file type ".${ext}". Please upload a DOCX, PDF, or HTML file.`);
+            showError(`Unsupported file type ".${ext}". Please upload a DOCX, PDF, HTML, or Markdown file.`);
             return;
         }
 
