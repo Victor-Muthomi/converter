@@ -3,5 +3,7 @@
 
 Flask>=3.0
 pdf2docx>=0.5.8
+PyMuPDF>=1.24.0
+pymupdf4llm>=0.0.27
 WeasyPrint>=61.0
 Werkzeug>=3.0

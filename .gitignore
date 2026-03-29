@@ -25,6 +25,7 @@ outputs/
 # IDEs
 .vscode/
 .idea/
+.codex
 *.swp
 *.swo
 

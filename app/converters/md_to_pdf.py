@@ -1,0 +1,109 @@
+"""
+Markdown → PDF converter.
+
+Uses a two-step conversion pipeline for better compatibility:
+  1. Pandoc converts Markdown into a standalone HTML document.
+  2. WeasyPrint renders that HTML into PDF.
+
+This avoids requiring a separate TeX-based PDF engine while still fitting
+the existing converter architecture used throughout DocForge.
+"""
+
+import logging
+import shutil
+import subprocess
+from pathlib import Path
+
+from app.converters.base import BaseConverter
+from app.services.file_manager import FileManager
+from app.utils.exceptions import ConversionError, ToolNotAvailableError
+
+logger = logging.getLogger(__name__)
+
+_PANDOC_CANDIDATES = [
+    "pandoc",
+    "/usr/bin/pandoc",
+]
+
+
+def _find_pandoc() -> str:
+    """Return the first available Pandoc binary path, or raise."""
+    for candidate in _PANDOC_CANDIDATES:
+        if shutil.which(candidate):
+            return candidate
+    raise ToolNotAvailableError("Pandoc")
+
+
+class MarkdownToPdfConverter(BaseConverter):
+    """Convert Markdown documents to PDF using Pandoc and WeasyPrint."""
+
+    input_format = "md"
+    output_format = "pdf"
+
+    def convert(self, input_file: str, output_file: str) -> str:
+        """
+        Convert *input_file* (Markdown) to *output_file* (PDF).
+
+        A temporary HTML artefact is created during the process and
+        cleaned up afterwards regardless of success or failure.
+        """
+        input_path = Path(input_file)
+        output_path = Path(output_file)
+        pandoc_binary = _find_pandoc()
+        temp_dir = FileManager.create_temp_dir(prefix="docforge_md_to_pdf_")
+        intermediate_html = temp_dir / f"{input_path.stem}.html"
+
+        logger.info("Converting %s → PDF via Pandoc + WeasyPrint", input_path.name)
+
+        try:
+            try:
+                subprocess.run(
+                    [
+                        pandoc_binary,
+                        "--from", "markdown",
+                        "--to", "html",
+                        "--standalone",
+                        "--output", str(intermediate_html),
+                        str(input_path),
+                    ],
+                    check=True,
+                    capture_output=True,
+                    text=True,
+                )
+            except subprocess.CalledProcessError as exc:
+                error_details = exc.stderr.strip() or exc.stdout.strip() or str(exc)
+                logger.error("Pandoc conversion failed: %s", error_details)
+                raise ConversionError(
+                    f"Pandoc failed to convert '{input_path.name}' to HTML: "
+                    f"{error_details}"
+                ) from exc
+
+            if not intermediate_html.exists():
+                raise ConversionError(
+                    f"Expected intermediate file '{intermediate_html}' was not created."
+                )
+
+            try:
+                from weasyprint import HTML
+
+                HTML(filename=str(intermediate_html)).write_pdf(str(output_path))
+            except ImportError as exc:
+                raise ConversionError(
+                    "The 'weasyprint' package is not installed. "
+                    "Run: pip install weasyprint"
+                ) from exc
+            except Exception as exc:
+                logger.error("WeasyPrint conversion failed: %s", exc)
+                raise ConversionError(
+                    f"Failed to convert '{input_path.name}' to PDF: {exc}"
+                ) from exc
+        finally:
+            FileManager.cleanup(temp_dir)
+
+        if not output_path.exists():
+            raise ConversionError(
+                f"Expected output file '{output_path}' was not created."
+            )
+
+        logger.info("Conversion complete → %s", output_path.name)
+        return str(output_path)

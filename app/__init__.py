@@ -12,7 +12,18 @@ import sys
 from flask import Flask
 
 from app.config import Config
-from app.converters import DocxToPdfConverter, HtmlToPdfConverter, PdfToDocxConverter
+from app.converters import (
+    DocxToHtmlConverter,
+    DocxToMarkdownConverter,
+    DocxToPdfConverter,
+    HtmlToMarkdownConverter,
+    HtmlToPdfConverter,
+    MarkdownToPdfConverter,
+    PdfToDocConverter,
+    PdfToHtmlConverter,
+    PdfToDocxConverter,
+    PdfToMarkdownConverter,
+)
 from app.routes import api
 from app.web import web
 from app.services.engine import ConversionEngine
@@ -56,8 +67,15 @@ def create_app() -> Flask:
 
     # ── Converter registry ─────────────────────────────────────────────────
     registry = ConverterRegistry()
+    registry.register(DocxToHtmlConverter())
+    registry.register(DocxToMarkdownConverter())
     registry.register(DocxToPdfConverter())
+    registry.register(HtmlToMarkdownConverter())
+    registry.register(MarkdownToPdfConverter())
+    registry.register(PdfToDocConverter())
+    registry.register(PdfToHtmlConverter())
     registry.register(PdfToDocxConverter())
+    registry.register(PdfToMarkdownConverter())
     registry.register(HtmlToPdfConverter())
     logger.info("Registered %d converter(s): %s", len(registry), registry.list_conversions())
 
