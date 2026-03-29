@@ -1,0 +1,7 @@
+# DocForge Python dependencies
+# System dependency: LibreOffice (install via package manager, not pip)
+
+Flask>=3.0
+pdf2docx>=0.5.8
+WeasyPrint>=61.0
+Werkzeug>=3.0
