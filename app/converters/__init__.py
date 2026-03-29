@@ -16,6 +16,7 @@ from app.converters.pdf_to_doc import PdfToDocConverter
 from app.converters.pdf_to_html import PdfToHtmlConverter
 from app.converters.pdf_to_md import PdfToMarkdownConverter
 from app.converters.pdf_to_docx import PdfToDocxConverter
+from app.converters.txt_to_pdf import TxtToPdfConverter
 
 __all__ = [
     "BaseConverter",
@@ -29,4 +30,5 @@ __all__ = [
     "PdfToDocxConverter",
     "PdfToMarkdownConverter",
     "HtmlToPdfConverter",
+    "TxtToPdfConverter",
 ]

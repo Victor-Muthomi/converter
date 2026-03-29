@@ -16,6 +16,7 @@ A modular document conversion API built with Flask.
 | PDF    | HTML   | PyMuPDF             |
 | PDF    | MD     | PyMuPDF4LLM         |
 | HTML   | PDF    | WeasyPrint          |
+| TXT    | PDF    | WeasyPrint          |
 
 ## System Requirements
 
@@ -35,6 +36,9 @@ sudo apt-get install pandoc
 # WeasyPrint system dependencies
 sudo apt-get install libpango-1.0-0 libpangocairo-1.0-0 libgdk-pixbuf2.0-0 libffi-dev libcairo2
 ```
+
+DocForge validates required external tools at conversion time and returns a
+clear error if a dependency such as Pandoc or LibreOffice is missing.
 
 ## Setup
 
@@ -173,6 +177,15 @@ curl -X POST http://127.0.0.1:5002/convert \
   -o converted.md
 ```
 
+#### TXT → PDF
+
+```bash
+curl -X POST http://127.0.0.1:5002/convert \
+  -F "file=@notes.txt" \
+  -F "target_format=pdf" \
+  -o converted.pdf
+```
+
 ## Project Structure
 
 ```
@@ -191,7 +204,8 @@ curl -X POST http://127.0.0.1:5002/convert \
 │   │   ├── pdf_to_docx.py   # pdf2docx converter
 │   │   ├── pdf_to_html.py   # PyMuPDF converter
 │   │   ├── pdf_to_md.py     # PyMuPDF4LLM converter
-│   │   └── html_to_pdf.py   # WeasyPrint converter
+│   │   ├── html_to_pdf.py   # WeasyPrint converter
+│   │   └── txt_to_pdf.py    # WeasyPrint converter
 │   ├── services/
 │   │   ├── registry.py      # Converter registry
 │   │   ├── engine.py        # Conversion orchestration
@@ -254,6 +268,12 @@ PDF → HTML is extracted page-by-page with PyMuPDF and combined into a single
 HTML document. The output is suitable for inspection and downstream HTML-based
 processing, but complex PDFs may still produce positioned markup that reflects
 the original page layout rather than semantic HTML.
+
+## Notes on TXT → PDF
+
+TXT → PDF renders plain text through a simple HTML template using WeasyPrint.
+Common text encodings are attempted automatically, and the output preserves
+line breaks and spacing in a print-friendly monospace layout.
 
 ## License
 

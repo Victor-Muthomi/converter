@@ -6,12 +6,12 @@ Pandoc must be installed on the host and available on ``PATH``.
 """
 
 import logging
-import shutil
 import subprocess
 from pathlib import Path
 
 from app.converters.base import BaseConverter
-from app.utils.exceptions import ConversionError, ToolNotAvailableError
+from app.utils.exceptions import ConversionError
+from app.utils.helpers import find_system_tool
 
 logger = logging.getLogger(__name__)
 
@@ -19,14 +19,6 @@ _PANDOC_CANDIDATES = [
     "pandoc",
     "/usr/bin/pandoc",
 ]
-
-
-def _find_pandoc() -> str:
-    """Return the first available Pandoc binary path, or raise."""
-    for candidate in _PANDOC_CANDIDATES:
-        if shutil.which(candidate):
-            return candidate
-    raise ToolNotAvailableError("Pandoc")
 
 
 class DocxToMarkdownConverter(BaseConverter):
@@ -44,7 +36,11 @@ class DocxToMarkdownConverter(BaseConverter):
         """
         input_path = Path(input_file)
         output_path = Path(output_file)
-        pandoc_binary = _find_pandoc()
+        pandoc_binary = find_system_tool(
+            "Pandoc",
+            _PANDOC_CANDIDATES,
+            install_hint="sudo apt-get install pandoc",
+        )
 
         logger.info("Converting %s → Markdown via Pandoc", input_path.name)
 

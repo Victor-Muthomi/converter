@@ -43,9 +43,11 @@ class InvalidFileError(DocForgeError):
 class ToolNotAvailableError(DocForgeError):
     """Raised when a required external tool (e.g. LibreOffice) is not installed."""
 
-    def __init__(self, tool_name: str):
+    def __init__(self, tool_name: str, install_hint: str | None = None):
         message = (
-            f"Required system tool '{tool_name}' is not available. "
+            f"Required system tool '{tool_name}' is not available on PATH. "
             f"Please install it before attempting this conversion."
         )
+        if install_hint:
+            message += f" Suggested install command: {install_hint}."
         super().__init__(message)

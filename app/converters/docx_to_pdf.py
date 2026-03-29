@@ -6,12 +6,12 @@ be installed on the host (``libreoffice`` on Linux).
 """
 
 import logging
-import shutil
 import subprocess
 from pathlib import Path
 
 from app.converters.base import BaseConverter
-from app.utils.exceptions import ConversionError, ToolNotAvailableError
+from app.utils.exceptions import ConversionError
+from app.utils.helpers import find_system_tool
 
 logger = logging.getLogger(__name__)
 
@@ -22,14 +22,6 @@ _LIBREOFFICE_CANDIDATES = [
     "soffice",              # alternative symlink
     "/usr/bin/libreoffice",
 ]
-
-
-def _find_libreoffice() -> str:
-    """Return the first available LibreOffice binary path, or raise."""
-    for candidate in _LIBREOFFICE_CANDIDATES:
-        if shutil.which(candidate):
-            return candidate
-    raise ToolNotAvailableError("LibreOffice")
 
 
 class DocxToPdfConverter(BaseConverter):
@@ -47,7 +39,11 @@ class DocxToPdfConverter(BaseConverter):
         """
         input_path = Path(input_file)
         output_path = Path(output_file)
-        lo_binary = _find_libreoffice()
+        lo_binary = find_system_tool(
+            "LibreOffice",
+            _LIBREOFFICE_CANDIDATES,
+            install_hint="sudo apt-get install libreoffice",
+        )
 
         logger.info("Converting %s → PDF via LibreOffice", input_path.name)
 

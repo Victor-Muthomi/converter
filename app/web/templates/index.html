@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DocForge — Document Converter</title>
-    <meta name="description" content="Convert documents between DOCX, PDF, HTML, and Markdown formats instantly with DocForge.">
+    <meta name="description" content="Convert documents between DOCX, PDF, HTML, Markdown, and TXT formats instantly with DocForge.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
@@ -57,7 +57,10 @@
                 <span class="format-dot html"></span> HTML → MD / PDF
             </div>
             <div class="format-badge">
-                <span class="format-dot html"></span> MD → PDF
+                <span class="format-dot md"></span> MD → PDF
+            </div>
+            <div class="format-badge">
+                <span class="format-dot txt"></span> TXT → PDF
             </div>
         </div>
 
@@ -82,9 +85,9 @@
                         </div>
                         <p class="dropzone-label">Drag & drop your file here</p>
                         <p class="dropzone-sublabel">or click to browse</p>
-                        <p class="dropzone-formats">Supports: DOCX, PDF, HTML, MD — Max 50 MB</p>
+                        <p class="dropzone-formats">Supports: DOCX, PDF, HTML, MD, TXT — Max 50 MB</p>
                     </div>
-                    <input type="file" id="fileInput" accept=".docx,.pdf,.html,.md,.markdown" hidden>
+                    <input type="file" id="fileInput" accept=".docx,.pdf,.html,.md,.markdown,.txt" hidden>
                 </div>
 
                 <!-- File preview (appears after file is selected) -->

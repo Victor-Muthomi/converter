@@ -4,9 +4,11 @@ DocForge helper utilities.
 Small, stateless functions used across multiple modules.
 """
 
+import shutil
 import uuid
 from pathlib import Path
 
+from app.utils.exceptions import ToolNotAvailableError
 from werkzeug.utils import secure_filename
 
 
@@ -56,3 +58,27 @@ def build_output_filename(input_filename: str, target_format: str) -> str:
     """
     stem = Path(input_filename).stem
     return f"{stem}.{target_format}"
+
+
+def find_system_tool(
+    tool_name: str,
+    candidates: list[str],
+    install_hint: str | None = None,
+) -> str:
+    """
+    Return the first available executable for *tool_name*.
+
+    Args:
+        tool_name: Friendly tool name shown in error messages.
+        candidates: Executable names or absolute paths to try with ``which``.
+        install_hint: Optional user-facing installation hint.
+
+    Raises:
+        ToolNotAvailableError: If none of the candidates can be resolved.
+    """
+    for candidate in candidates:
+        resolved = shutil.which(candidate)
+        if resolved:
+            return resolved
+
+    raise ToolNotAvailableError(tool_name, install_hint=install_hint)

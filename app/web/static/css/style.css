@@ -236,6 +236,14 @@ body {
     background: #f97316;
 }
 
+.format-dot.md {
+    background: #a78bfa;
+}
+
+.format-dot.txt {
+    background: #14b8a6;
+}
+
 /* ── Converter card ────────────────────────────────────────────────────── */
 .converter-card {
     position: relative;
@@ -386,6 +394,15 @@ body {
 
 .file-icon.html {
     background: linear-gradient(135deg, #f97316, #ea580c);
+}
+
+.file-icon.md,
+.file-icon.markdown {
+    background: linear-gradient(135deg, #a78bfa, #8b5cf6);
+}
+
+.file-icon.txt {
+    background: linear-gradient(135deg, #14b8a6, #0f766e);
 }
 
 .file-info {

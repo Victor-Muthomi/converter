@@ -16,7 +16,7 @@ import logging
 from pathlib import Path
 
 from app.services.registry import ConverterRegistry
-from app.utils.exceptions import ConversionError, InvalidFileError
+from app.utils.exceptions import ConversionError, DocForgeError, InvalidFileError
 from app.utils.helpers import build_output_filename, get_file_extension
 
 logger = logging.getLogger(__name__)
@@ -82,7 +82,7 @@ class ConversionEngine:
         # ── 5. Execute ────────────────────────────────────────────────────
         try:
             result = converter.convert(str(input_path), str(output_path))
-        except ConversionError:
+        except DocForgeError:
             raise  # already a domain exception
         except Exception as exc:
             logger.exception("Unexpected error during conversion")

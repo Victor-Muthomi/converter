@@ -28,6 +28,7 @@
         ],
         md: [{ value: "pdf", label: "PDF", icon: "📄", desc: "Portable Document" }],
         markdown: [{ value: "pdf", label: "PDF", icon: "📄", desc: "Portable Document" }],
+        txt: [{ value: "pdf", label: "PDF", icon: "📄", desc: "Portable Document" }],
     };
 
     /* ── DOM refs ─────────────────────────────────────────────────────── */
@@ -95,7 +96,7 @@
         const ext = getExtension(file.name);
 
         if (!CONVERSIONS[ext]) {
-            showError(`Unsupported file type ".${ext}". Please upload a DOCX, PDF, HTML, or Markdown file.`);
+            showError(`Unsupported file type ".${ext}". Please upload a DOCX, PDF, HTML, Markdown, or TXT file.`);
             return;
         }
 

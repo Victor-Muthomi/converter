@@ -11,13 +11,13 @@ architecture used throughout DocForge.
 """
 
 import logging
-import shutil
 import subprocess
 from pathlib import Path
 
 from app.converters.base import BaseConverter
 from app.services.file_manager import FileManager
-from app.utils.exceptions import ConversionError, ToolNotAvailableError
+from app.utils.exceptions import ConversionError
+from app.utils.helpers import find_system_tool
 
 logger = logging.getLogger(__name__)
 
@@ -26,14 +26,6 @@ _LIBREOFFICE_CANDIDATES = [
     "soffice",
     "/usr/bin/libreoffice",
 ]
-
-
-def _find_libreoffice() -> str:
-    """Return the first available LibreOffice binary path, or raise."""
-    for candidate in _LIBREOFFICE_CANDIDATES:
-        if shutil.which(candidate):
-            return candidate
-    raise ToolNotAvailableError("LibreOffice")
 
 
 class PdfToDocConverter(BaseConverter):
@@ -51,7 +43,11 @@ class PdfToDocConverter(BaseConverter):
         """
         input_path = Path(input_file)
         output_path = Path(output_file)
-        lo_binary = _find_libreoffice()
+        lo_binary = find_system_tool(
+            "LibreOffice",
+            _LIBREOFFICE_CANDIDATES,
+            install_hint="sudo apt-get install libreoffice",
+        )
         temp_dir = FileManager.create_temp_dir(prefix="docforge_pdf_to_doc_")
 
         intermediate_docx = temp_dir / f"{input_path.stem}.docx"

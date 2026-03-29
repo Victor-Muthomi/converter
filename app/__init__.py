@@ -23,6 +23,7 @@ from app.converters import (
     PdfToHtmlConverter,
     PdfToDocxConverter,
     PdfToMarkdownConverter,
+    TxtToPdfConverter,
 )
 from app.routes import api
 from app.web import web
@@ -77,6 +78,7 @@ def create_app() -> Flask:
     registry.register(PdfToDocxConverter())
     registry.register(PdfToMarkdownConverter())
     registry.register(HtmlToPdfConverter())
+    registry.register(TxtToPdfConverter())
     logger.info("Registered %d converter(s): %s", len(registry), registry.list_conversions())
 
     # ── Services ───────────────────────────────────────────────────────────
