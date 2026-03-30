@@ -1,6 +1,40 @@
 # DocForge
 
-A modular document conversion API built with Flask.
+DocForge is a modular, privacy-conscious document conversion API built with
+Flask for teams and individuals who need reliable file conversion without
+depending on opaque third-party web tools.
+
+## Why DocForge
+
+Document conversion is a routine task, but many existing tools create
+unnecessary friction. Online platforms often put basic features behind paywalls,
+require sensitive files to be uploaded to third-party servers, provide little
+clarity around file retention, and produce inconsistent output quality. They
+also tend to solve only one narrow use case at a time, which makes them a poor
+fit for repeatable business workflows and low-connectivity environments.
+
+DocForge was created to offer a more practical alternative: a local-first,
+extensible conversion system that gives users more privacy, control, and
+transparency in how documents are processed. It is designed to support real
+workflows across technical and non-technical use cases, whether the goal is to
+convert a single file safely or integrate document processing into a larger
+internal system.
+
+## What It Delivers
+
+- Privacy-first conversion for sensitive files
+- Lower dependence on paid conversion platforms
+- Support for multiple document workflows in one service
+- Extensible architecture for adding new converters over time
+- Better transparency for debugging and operational use
+- A strong fit for self-hosted and internal business environments
+
+## Who It Helps
+
+- Developers building document processing pipelines
+- Businesses handling internal reports and client files
+- Students and administrators working across multiple formats
+- Teams with confidentiality, compliance, or connectivity constraints
 
 ## Supported Conversions
 
@@ -40,21 +74,105 @@ sudo apt-get install libpango-1.0-0 libpangocairo-1.0-0 libgdk-pixbuf2.0-0 libff
 DocForge validates required external tools at conversion time and returns a
 clear error if a dependency such as Pandoc or LibreOffice is missing.
 
+## Check Python 3
+
+Before setup, confirm that Python 3 is available on your system.
+
+### macOS / Linux
+
+```bash
+python3 --version
+```
+
+### Windows
+
+```powershell
+py -3 --version
+```
+
+If Python 3 is not installed, use the commands for your operating system below.
+
+### Install Python 3 on Ubuntu / Debian
+
+```bash
+sudo apt-get update
+sudo apt-get install -y python3 python3-venv python3-pip
+```
+
+### Install Python 3 on Fedora
+
+```bash
+sudo dnf install -y python3 python3-pip
+```
+
+### Install Python 3 on RHEL / CentOS Stream
+
+```bash
+sudo dnf install -y python3 python3-pip
+```
+
+### Install Python 3 on Arch Linux
+
+```bash
+sudo pacman -Sy python python-pip
+```
+
+### Install Python 3 on macOS
+
+```bash
+brew install python
+```
+
+### Install Python 3 on Windows
+
+Using `winget`:
+
+```powershell
+winget install -e --id Python.Python.3.11
+```
+
+Using `choco`:
+
+```powershell
+choco install python --yes
+```
+
 ## Setup
+
+### macOS / Linux
 
 ```bash
 # 1. Create and activate a virtual environment
-python -m venv venv
+python3 -m venv venv
 source venv/bin/activate
 
 # 2. Install Python dependencies
-pip install -r requirements.txt
+python3 -m pip install -r requirements.txt
+```
+
+### Windows PowerShell
+
+```powershell
+# 1. Create and activate a virtual environment
+py -3 -m venv venv
+.\venv\Scripts\Activate.ps1
+
+# 2. Install Python dependencies
+py -3 -m pip install -r requirements.txt
 ```
 
 ## Running Locally
 
+### macOS / Linux
+
 ```bash
-python run.py
+python3 run.py
+```
+
+### Windows
+
+```powershell
+py -3 run.py
 ```
 
 The server starts on **http://127.0.0.1:5002**.
