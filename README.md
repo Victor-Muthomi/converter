@@ -36,45 +36,7 @@ internal system.
 - Students and administrators working across multiple formats
 - Teams with confidentiality, compliance, or connectivity constraints
 
-## Supported Conversions
-
-| Input  | Output | Engine              |
-|--------|--------|---------------------|
-| DOCX   | HTML   | Pandoc              |
-| DOCX   | MD     | Pandoc              |
-| DOCX   | PDF    | LibreOffice headless|
-| HTML   | MD     | Pandoc              |
-| MD     | PDF    | Pandoc + WeasyPrint |
-| PDF    | DOC    | pdf2docx + LibreOffice |
-| PDF    | DOCX   | pdf2docx            |
-| PDF    | HTML   | PyMuPDF             |
-| PDF    | MD     | PyMuPDF4LLM         |
-| HTML   | PDF    | WeasyPrint          |
-| TXT    | PDF    | WeasyPrint          |
-
-## System Requirements
-
-- **Python** 3.11+
-- **LibreOffice** (for DOCX → PDF conversion)
-- **Pandoc** (for DOCX → Markdown conversion)
-- **Pandoc** is also required for Markdown → PDF because Markdown is first
-  rendered to standalone HTML before PDF generation.
-- **LibreOffice** is also required for PDF → DOC because the final DOC export
-  is performed from an intermediate DOCX file.
-
-```bash
-# Ubuntu / Debian
-sudo apt-get install libreoffice
-sudo apt-get install pandoc
-
-# WeasyPrint system dependencies
-sudo apt-get install libpango-1.0-0 libpangocairo-1.0-0 libgdk-pixbuf2.0-0 libffi-dev libcairo2
-```
-
-DocForge validates required external tools at conversion time and returns a
-clear error if a dependency such as Pandoc or LibreOffice is missing.
-
-## Check Python 3
+## Step 1: Check Python 3
 
 Before setup, confirm that Python 3 is available on your system.
 
@@ -90,7 +52,7 @@ python3 --version
 py -3 --version
 ```
 
-If Python 3 is not installed, use the commands for your operating system below.
+## Step 2: Install Python 3
 
 ### Install Python 3 on Ubuntu / Debian
 
@@ -137,31 +99,57 @@ Using `choco`:
 choco install python --yes
 ```
 
-## Setup
+## Step 3: Install System Dependencies
+
+DocForge requires **Python 3.11+** and a few external tools depending on the
+conversion path you use:
+
+- **LibreOffice** for DOCX → PDF and PDF → DOC
+- **Pandoc** for DOCX → Markdown, HTML → Markdown, and Markdown → PDF
+- **WeasyPrint system libraries** for HTML → PDF, Markdown → PDF, and TXT → PDF
+
+### Ubuntu / Debian
+
+```bash
+sudo apt-get update
+sudo apt-get install -y libreoffice pandoc
+sudo apt-get install -y libpango-1.0-0 libpangocairo-1.0-0 libgdk-pixbuf2.0-0 libffi-dev libcairo2
+```
+
+DocForge validates required external tools at conversion time and returns a
+clear error if a dependency such as Pandoc or LibreOffice is missing.
+
+## Step 4: Set Up The Virtual Environment
 
 ### macOS / Linux
 
 ```bash
-# 1. Create and activate a virtual environment
 python3 -m venv venv
 source venv/bin/activate
+```
 
-# 2. Install Python dependencies
+### Windows PowerShell
+
+```powershell
+py -3 -m venv venv
+.\venv\Scripts\Activate.ps1
+```
+
+## Step 5: Install Python Requirements
+
+### macOS / Linux
+
+```bash
 python3 -m pip install -r requirements.txt
 ```
 
 ### Windows PowerShell
 
 ```powershell
-# 1. Create and activate a virtual environment
-py -3 -m venv venv
-.\venv\Scripts\Activate.ps1
-
-# 2. Install Python dependencies
 py -3 -m pip install -r requirements.txt
 ```
 
-## Running Locally
+## Step 6: Run The Program
 
 ### macOS / Linux
 
@@ -176,6 +164,22 @@ py -3 run.py
 ```
 
 The server starts on **http://127.0.0.1:5002**.
+
+## Supported Conversions
+
+| Input  | Output | Engine              |
+|--------|--------|---------------------|
+| DOCX   | HTML   | Pandoc              |
+| DOCX   | MD     | Pandoc              |
+| DOCX   | PDF    | LibreOffice headless|
+| HTML   | MD     | Pandoc              |
+| MD     | PDF    | Pandoc + WeasyPrint |
+| PDF    | DOC    | pdf2docx + LibreOffice |
+| PDF    | DOCX   | pdf2docx            |
+| PDF    | HTML   | PyMuPDF             |
+| PDF    | MD     | PyMuPDF4LLM         |
+| HTML   | PDF    | WeasyPrint          |
+| TXT    | PDF    | WeasyPrint          |
 
 ## API Endpoints
 
