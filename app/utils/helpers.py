@@ -12,6 +12,23 @@ from app.utils.exceptions import ToolNotAvailableError
 from werkzeug.utils import secure_filename
 
 
+def normalize_extension(extension: str) -> str:
+    """
+    Collapse equivalent extensions to the canonical form used internally.
+
+    Args:
+        extension: Raw extension without a leading dot.
+
+    Returns:
+        Canonical lowercase extension string.
+    """
+    normalized = extension.lower().strip()
+    aliases = {
+        "markdown": "md",
+    }
+    return aliases.get(normalized, normalized)
+
+
 def get_file_extension(filename: str) -> str:
     """
     Extract the lowercase file extension without the leading dot.
@@ -22,7 +39,8 @@ def get_file_extension(filename: str) -> str:
     Returns:
         Lowercase extension string (e.g. "docx").
     """
-    return Path(filename).suffix.lstrip(".").lower()
+    extension = Path(filename).suffix.lstrip(".")
+    return normalize_extension(extension)
 
 
 def generate_safe_filename(original_filename: str) -> str:

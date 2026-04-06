@@ -9,8 +9,9 @@ routes and converter code.
 import logging
 import shutil
 import tempfile
+import zipfile
 from pathlib import Path
-from typing import Optional
+from typing import Iterable, Optional
 
 from werkzeug.datastructures import FileStorage
 
@@ -63,6 +64,20 @@ class FileManager:
 
         return file.filename
 
+    def validate_uploads(self, files: Iterable[Optional[FileStorage]]) -> list[str]:
+        """
+        Validate a batch of uploaded files and return their original names.
+
+        Raises:
+            InvalidFileError: If no files were supplied or any file is invalid.
+        """
+        filenames = [self.validate_upload(file) for file in files]
+
+        if not filenames:
+            raise InvalidFileError("No file was provided in the request.")
+
+        return filenames
+
     # ── File operations ────────────────────────────────────────────────────
 
     def save_upload(self, file: FileStorage, dest_dir: Path) -> Path:
@@ -77,6 +92,31 @@ class FileManager:
         file.save(str(dest_path))
         logger.info("Saved upload → %s", dest_path)
         return dest_path
+
+    def save_uploads(self, files: Iterable[FileStorage], dest_dir: Path) -> list[Path]:
+        """Save multiple uploaded files and return their destination paths."""
+        return [self.save_upload(file, dest_dir) for file in files]
+
+    def create_archive(
+        self,
+        files: Iterable[Path],
+        dest_dir: Path,
+        archive_name: str = "docforge_batch.zip",
+    ) -> Path:
+        """
+        Bundle converted files into a ZIP archive for batch downloads.
+
+        Returns:
+            Path to the generated archive.
+        """
+        archive_path = dest_dir / generate_safe_filename(archive_name)
+
+        with zipfile.ZipFile(archive_path, "w", compression=zipfile.ZIP_DEFLATED) as archive:
+            for file_path in files:
+                archive.write(file_path, arcname=file_path.name)
+
+        logger.info("Created archive → %s", archive_path)
+        return archive_path
 
     @staticmethod
     def create_temp_dir(prefix: str = "docforge_") -> Path:

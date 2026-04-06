@@ -25,6 +25,7 @@ internal system.
 - Privacy-first conversion for sensitive files
 - Lower dependence on paid conversion platforms
 - Support for multiple document workflows in one service
+- Merge multiple documents into a single PDF
 - Extensible architecture for adding new converters over time
 - Better transparency for debugging and operational use
 - A strong fit for self-hosted and internal business environments
@@ -104,7 +105,7 @@ choco install python --yes
 DocForge requires **Python 3.11+** and a few external tools depending on the
 conversion path you use:
 
-- **LibreOffice** for DOCX → PDF and PDF → DOC
+- **LibreOffice** for DOCX → PDF, PPTX → PDF, and PDF → DOC
 - **Pandoc** for DOCX → Markdown, HTML → Markdown, and Markdown → PDF
 - **WeasyPrint system libraries** for HTML → PDF, Markdown → PDF, and TXT → PDF
 
@@ -172,6 +173,7 @@ The server starts on **http://127.0.0.1:5002**.
 | DOCX   | HTML   | Pandoc              |
 | DOCX   | MD     | Pandoc              |
 | DOCX   | PDF    | LibreOffice headless|
+| PPTX   | PDF    | LibreOffice headless|
 | HTML   | MD     | Pandoc              |
 | MD     | PDF    | Pandoc + WeasyPrint |
 | PDF    | DOC    | pdf2docx + LibreOffice |
@@ -206,8 +208,25 @@ POST /convert
 
 | Field          | Type | Description                          |
 |----------------|------|--------------------------------------|
-| `file`         | file | The document to convert              |
+| `file`         | file | One or more documents to convert     |
 | `target_format`| text | Desired output extension (e.g. `pdf`)|
+
+If you upload a single file, DocForge returns the converted file directly.
+If you upload multiple files with the same `target_format`, DocForge returns a
+ZIP archive containing all converted outputs.
+
+### Merge Documents Into One PDF
+
+```
+POST /merge
+```
+
+| Field  | Type | Description                                      |
+|--------|------|--------------------------------------------------|
+| `file` | file | Two or more supported documents to merge to PDF |
+
+The merged PDF preserves the upload order from the request. Non-PDF inputs are
+converted to PDF first using the existing conversion pipeline.
 
 #### DOCX → PDF
 
@@ -234,6 +253,35 @@ curl -X POST http://127.0.0.1:5002/convert \
   -F "file=@document.docx" \
   -F "target_format=html" \
   -o converted.html
+```
+
+#### Batch conversion to PDF
+
+```bash
+curl -X POST http://127.0.0.1:5002/convert \
+  -F "file=@chapter1.docx" \
+  -F "file=@chapter2.docx" \
+  -F "target_format=pdf" \
+  -o docforge_batch_pdf.zip
+```
+
+#### PPTX → PDF
+
+```bash
+curl -X POST http://127.0.0.1:5002/convert \
+  -F "file=@slides.pptx" \
+  -F "target_format=pdf" \
+  -o slides.pdf
+```
+
+#### Merge multiple documents into one PDF
+
+```bash
+curl -X POST http://127.0.0.1:5002/merge \
+  -F "file=@intro.docx" \
+  -F "file=@appendix.pdf" \
+  -F "file=@notes.md" \
+  -o docforge_merged.pdf
 ```
 
 #### HTML → Markdown
@@ -327,11 +375,13 @@ curl -X POST http://127.0.0.1:5002/convert \
 │   │   ├── pdf_to_html.py   # PyMuPDF converter
 │   │   ├── pdf_to_md.py     # PyMuPDF4LLM converter
 │   │   ├── html_to_pdf.py   # WeasyPrint converter
+│   │   ├── pptx_to_pdf.py   # LibreOffice converter
 │   │   └── txt_to_pdf.py    # WeasyPrint converter
 │   ├── services/
 │   │   ├── registry.py      # Converter registry
 │   │   ├── engine.py        # Conversion orchestration
-│   │   └── file_manager.py  # Upload handling
+│   │   ├── file_manager.py  # Upload handling
+│   │   └── merger.py        # Document merge workflow
 │   └── utils/
 │       ├── exceptions.py    # Custom exceptions
 │       └── helpers.py       # Filename utilities
@@ -370,6 +420,12 @@ which keeps the output practical for plain-text workflows.
 DOCX → HTML uses Pandoc to produce standalone HTML. The output is convenient
 for browser viewing and downstream HTML-based conversions, though Word-specific
 layout or styling may be simplified during export.
+
+## Notes on PPTX → PDF
+
+PPTX → PDF uses LibreOffice in headless mode. Complex slide animations,
+embedded media behavior, or highly custom fonts may render differently in the
+exported PDF depending on the host LibreOffice installation.
 
 ## Notes on HTML → Markdown
 

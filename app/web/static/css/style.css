@@ -228,6 +228,10 @@ body {
     background: #3b82f6;
 }
 
+.format-dot.pptx {
+    background: #f97316;
+}
+
 .format-dot.pdf {
     background: #ef4444;
 }
@@ -359,8 +363,9 @@ body {
 /* ── File preview ──────────────────────────────────────────────────────── */
 .file-preview {
     display: flex;
-    align-items: center;
-    gap: 14px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
     padding: 14px 16px;
     background: var(--bg-glass);
     border: 1px solid var(--border-subtle);
@@ -371,6 +376,27 @@ body {
 
 .file-preview.hidden {
     display: none;
+}
+
+.file-summary {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.file-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-height: 240px;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+.file-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
 }
 
 .file-icon {
@@ -386,6 +412,10 @@ body {
 
 .file-icon.docx {
     background: linear-gradient(135deg, #3b82f6, #2563eb);
+}
+
+.file-icon.pptx {
+    background: linear-gradient(135deg, #f97316, #ea580c);
 }
 
 .file-icon.pdf {
@@ -434,6 +464,7 @@ body {
     cursor: pointer;
     padding: 6px;
     border-radius: 6px;
+    align-self: flex-end;
     transition: color var(--t-fast) ease, background var(--t-fast) ease;
 }
 
@@ -502,8 +533,18 @@ body {
 /* ── Convert button ────────────────────────────────────────────────────── */
 .step-convert {
     display: flex;
-    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
     padding-top: 8px;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 12px;
+    width: 100%;
+    justify-content: center;
+    flex-wrap: wrap;
 }
 
 .btn-convert {
@@ -569,6 +610,25 @@ body {
 
 .btn-retry:hover:not(:disabled) {
     box-shadow: 0 8px 32px rgba(248, 113, 113, 0.45);
+}
+
+.btn-merge-action {
+    background: linear-gradient(135deg, #0ea5e9, #06b6d4);
+    box-shadow: 0 4px 20px rgba(14, 165, 233, 0.3);
+}
+
+.btn-merge-action:hover:not(:disabled) {
+    box-shadow: 0 8px 32px rgba(6, 182, 212, 0.4);
+}
+
+.action-hint {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    text-align: center;
+}
+
+.action-hint.hidden {
+    display: none;
 }
 
 /* ── Progress overlay ──────────────────────────────────────────────────── */
@@ -768,6 +828,10 @@ body {
     }
 
     .format-options {
+        flex-direction: column;
+    }
+
+    .action-buttons {
         flex-direction: column;
     }
 

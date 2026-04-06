@@ -23,12 +23,14 @@ from app.converters import (
     PdfToHtmlConverter,
     PdfToDocxConverter,
     PdfToMarkdownConverter,
+    PptxToPdfConverter,
     TxtToPdfConverter,
 )
 from app.routes import api
 from app.web import web
 from app.services.engine import ConversionEngine
 from app.services.file_manager import FileManager
+from app.services.merger import DocumentMerger
 from app.services.registry import ConverterRegistry
 
 
@@ -78,16 +80,19 @@ def create_app() -> Flask:
     registry.register(PdfToDocxConverter())
     registry.register(PdfToMarkdownConverter())
     registry.register(HtmlToPdfConverter())
+    registry.register(PptxToPdfConverter())
     registry.register(TxtToPdfConverter())
     logger.info("Registered %d converter(s): %s", len(registry), registry.list_conversions())
 
     # ── Services ───────────────────────────────────────────────────────────
     file_manager = FileManager(allowed_extensions=Config.ALLOWED_INPUT_EXTENSIONS)
     engine = ConversionEngine(registry=registry, output_dir=Config.OUTPUT_FOLDER)
+    merger = DocumentMerger(engine=engine, output_dir=Config.OUTPUT_FOLDER)
 
     # Stash services on the app so routes can access them via current_app
     app.config["CONVERSION_ENGINE"] = engine
     app.config["FILE_MANAGER"] = file_manager
+    app.config["DOCUMENT_MERGER"] = merger
 
     # ── Routes ─────────────────────────────────────────────────────────────
     app.register_blueprint(api)

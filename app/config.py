@@ -25,7 +25,7 @@ class Config:
     MAX_CONTENT_LENGTH: int = 50 * 1024 * 1024  # 50 MB
 
     # Allowed input extensions (add more as converters are registered)
-    ALLOWED_INPUT_EXTENSIONS: set[str] = {"docx", "pdf", "html", "md", "txt"}
+    ALLOWED_INPUT_EXTENSIONS: set[str] = {"docx", "pdf", "html", "md", "pptx", "txt"}
 
 
 # ── Ensure required directories exist ──────────────────────────────────────
