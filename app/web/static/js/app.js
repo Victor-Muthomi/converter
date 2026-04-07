@@ -89,8 +89,13 @@
         return "docforge_merged.pdf";
     }
 
+    function canConvertFileToPdf(file) {
+        const ext = getExtension(file.name);
+        return ext === "pdf" || (CONVERSIONS[ext] || []).some((option) => option.value === "pdf");
+    }
+
     function canMergeFiles(files) {
-        return files.length > 1 && getCommonFormatOptions(files).some((option) => option.value === "pdf");
+        return files.length > 1 && files.every(canConvertFileToPdf);
     }
 
     function updateActionButtons() {
@@ -204,7 +209,7 @@
         }
 
         const options = getCommonFormatOptions(files);
-        if (!options.length) {
+        if (!options.length && !canMergeFiles(files)) {
             showError("These files do not share a common output format. Choose files that can be converted to the same target format.");
             return;
         }
@@ -241,6 +246,14 @@
     /* ── Format options ────────────────────────────────────────────────── */
     function renderFormatOptions(options) {
         formatOptions.innerHTML = "";
+
+        if (!options.length) {
+            const message = document.createElement("p");
+            message.className = "format-empty-state";
+            message.textContent = "These files do not share a direct conversion target, but they can still be merged into one PDF.";
+            formatOptions.appendChild(message);
+            return;
+        }
 
         options.forEach((opt, idx) => {
             const el = document.createElement("div");
