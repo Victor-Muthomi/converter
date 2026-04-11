@@ -53,10 +53,29 @@
     const errorOverlay = document.getElementById("errorOverlay");
     const errorMessage = document.getElementById("errorMessage");
     const btnRetry = document.getElementById("btnRetry");
+    const navMerge = document.getElementById("navMerge");
+    const navZip = document.getElementById("navZip");
+    const navCompress = document.getElementById("navCompress");
+    const dropdownItems = document.querySelectorAll(".dropdown-item");
 
     /* ── State ────────────────────────────────────────────────────────── */
     let selectedFiles = [];
     let selectedFormat = null;
+    let pendingSourceFormat = null; // set when user picks a conversion from navbar
+    let currentMode = "convert";
+
+    /* ── Source-format filter map ─────────────────────────────────────── */
+    const SOURCE_FORMAT_ACCEPT = {
+        docx: ".docx",
+        pptx: ".pptx",
+        pdf: ".pdf",
+        html: ".html",
+        md: ".md,.markdown",
+        txt: ".txt",
+    };
+
+    const DEFAULT_ACCEPT = ".docx,.pptx,.pdf,.html,.md,.markdown,.txt";
+    const DEFAULT_FORMATS_TEXT = "Supports: DOCX, PPTX, PDF, HTML, MD, TXT — Max 50 MB";
 
     /* ── Helpers ──────────────────────────────────────────────────────── */
     function normalizeExtension(ext) {
@@ -89,6 +108,17 @@
         return "docforge_merged.pdf";
     }
 
+    function buildZipOutputName() {
+        return "docforge_files.zip";
+    }
+
+    function buildCompressedOutputName(originalName) {
+        const lastDot = originalName.lastIndexOf(".");
+        const stem = lastDot > 0 ? originalName.substring(0, lastDot) : originalName;
+        const ext = lastDot > 0 ? originalName.substring(lastDot + 1) : "";
+        return ext ? `${stem}_compressed.${ext}` : `${stem}_compressed`;
+    }
+
     function canConvertFileToPdf(file) {
         const ext = getExtension(file.name);
         return ext === "pdf" || (CONVERSIONS[ext] || []).some((option) => option.value === "pdf");
@@ -100,13 +130,27 @@
 
     function updateActionButtons() {
         const fileCount = selectedFiles.length;
-        btnConvert.disabled = fileCount === 0 || !selectedFormat;
-        btnConvertText.textContent = fileCount > 1 ? `Convert ${fileCount} Files` : "Convert Now";
+        if (currentMode === "zip") {
+            btnConvert.disabled = fileCount === 0;
+            btnConvertText.textContent = fileCount > 1 ? `Zip ${fileCount} Files` : "Create ZIP";
+        } else {
+            btnConvert.disabled = fileCount === 0 || !selectedFormat;
+            btnConvertText.textContent = fileCount > 1 ? `Convert ${fileCount} Files` : "Convert Now";
+        }
 
         const mergeAvailable = canMergeFiles(selectedFiles);
         btnMerge.disabled = !mergeAvailable;
         btnMergeText.textContent = mergeAvailable ? `Merge ${fileCount} Files to PDF` : "Merge to PDF";
         mergeHint.classList.toggle("hidden", !mergeAvailable);
+    }
+
+    function renderZipModeState() {
+        formatOptions.innerHTML = "";
+
+        const message = document.createElement("p");
+        message.className = "format-empty-state";
+        message.textContent = "ZIP mode bundles your selected files into one archive without converting them.";
+        formatOptions.appendChild(message);
     }
 
     function getCommonFormatOptions(files) {
@@ -209,7 +253,7 @@
         }
 
         const options = getCommonFormatOptions(files);
-        if (!options.length && !canMergeFiles(files)) {
+        if (currentMode !== "zip" && !options.length && !canMergeFiles(files)) {
             showError("These files do not share a common output format. Choose files that can be converted to the same target format.");
             return;
         }
@@ -218,7 +262,11 @@
         selectedFormat = null;
 
         renderFilePreview();
-        renderFormatOptions(options);
+        if (currentMode === "zip") {
+            renderZipModeState();
+        } else {
+            renderFormatOptions(options);
+        }
         updateActionButtons();
     }
 
@@ -227,7 +275,13 @@
     function resetUI() {
         selectedFiles = [];
         selectedFormat = null;
+        pendingSourceFormat = null;
+        currentMode = "convert";
         fileInput.value = "";
+
+        // Restore default file filter
+        fileInput.accept = DEFAULT_ACCEPT;
+        document.querySelector(".dropzone-formats").textContent = DEFAULT_FORMATS_TEXT;
 
         filePreview.classList.add("hidden");
         dropzone.style.display = "";
@@ -292,6 +346,219 @@
     btnRetry.addEventListener("click", () => {
         errorOverlay.classList.add("hidden");
     });
+
+    navMerge.addEventListener("click", (e) => {
+        e.preventDefault();
+        currentMode = "convert";
+        if (selectedFiles.length) {
+            renderFormatOptions(getCommonFormatOptions(selectedFiles));
+            updateActionButtons();
+        }
+        showInfo("Merge Mode", "Please upload 2 or more documents. They will be automatically converted and merged into a single PDF.");
+        fileInput.click();
+    });
+
+    navZip.addEventListener("click", (e) => {
+        e.preventDefault();
+        currentMode = "zip";
+        selectedFormat = null;
+
+        if (selectedFiles.length) {
+            renderZipModeState();
+            updateActionButtons();
+        }
+
+        showInfo("Zip Mode", "Please upload one or more documents. They will be bundled into a ZIP archive without conversion.");
+        fileInput.click();
+    });
+
+    navCompress.addEventListener("click", (e) => {
+        e.preventDefault();
+        openCompressModal();
+    });
+
+    /* ── Compress Modal Logic ──────────────────────────────────────────── */
+    const compressModal       = document.getElementById("compressModal");
+    const compressModalClose  = document.getElementById("compressModalClose");
+    const compressModalBackdrop = document.getElementById("compressModalBackdrop");
+    const compressDropzone    = document.getElementById("compressDropzone");
+    const compressFileInput   = document.getElementById("compressFileInput");
+    const compressFilePreview = document.getElementById("compressFilePreview");
+    const compressFileName    = document.getElementById("compressFileName");
+    const compressFileSize    = document.getElementById("compressFileSize");
+    const btnCompressGo       = document.getElementById("btnCompressGo");
+    const qualityCards        = document.querySelectorAll(".quality-card");
+    const qualityRadios       = document.querySelectorAll("input[name='quality']");
+
+    let compressFile = null;
+    let selectedQuality = "medium";
+
+    function openCompressModal() {
+        compressModal.classList.remove("hidden");
+        document.body.style.overflow = "hidden";
+    }
+
+    function closeCompressModal() {
+        compressModal.classList.add("hidden");
+        document.body.style.overflow = "";
+        compressFile = null;
+        compressFileInput.value = "";
+        compressFilePreview.classList.add("hidden");
+        btnCompressGo.disabled = true;
+    }
+
+    compressModalClose.addEventListener("click", closeCompressModal);
+    compressModalBackdrop.addEventListener("click", closeCompressModal);
+
+    // Quality radio selection
+    qualityRadios.forEach(radio => {
+        radio.addEventListener("change", () => {
+            selectedQuality = radio.value;
+            qualityCards.forEach(c => c.classList.remove("selected"));
+            radio.closest(".quality-option").querySelector(".quality-card").classList.add("selected");
+        });
+    });
+
+    // Compress dropzone
+    compressDropzone.addEventListener("click", () => compressFileInput.click());
+
+    compressFileInput.addEventListener("change", (e) => {
+        if (e.target.files[0]) setCompressFile(e.target.files[0]);
+    });
+
+    ["dragenter", "dragover"].forEach(evt =>
+        compressDropzone.addEventListener(evt, (e) => {
+            e.preventDefault();
+            compressDropzone.classList.add("drag-over");
+        })
+    );
+    ["dragleave", "drop"].forEach(evt =>
+        compressDropzone.addEventListener(evt, (e) => {
+            e.preventDefault();
+            compressDropzone.classList.remove("drag-over");
+        })
+    );
+    compressDropzone.addEventListener("drop", (e) => {
+        const file = e.dataTransfer.files[0];
+        if (file) {
+            const COMPRESS_ACCEPT = [".docx", ".pptx", ".pdf"];
+            const ext = "." + file.name.split(".").pop().toLowerCase();
+            if (!COMPRESS_ACCEPT.includes(ext)) {
+                alert("Unsupported file type. Please drop a PDF, DOCX, or PPTX file.");
+                return;
+            }
+            setCompressFile(file);
+        }
+    });
+
+    function setCompressFile(file) {
+        compressFile = file;
+        compressFileName.textContent = file.name;
+        compressFileSize.textContent = formatBytes(file.size);
+        compressFilePreview.classList.remove("hidden");
+        btnCompressGo.disabled = false;
+    }
+
+    btnCompressGo.addEventListener("click", async () => {
+        if (!compressFile) return;
+
+        btnCompressGo.disabled = true;
+        btnCompressGo.querySelector(".btn-text").textContent = "Compressing…";
+
+        const formData = new FormData();
+        formData.append("file", compressFile);
+        formData.append("quality", selectedQuality);
+
+        try {
+            const response = await fetch("/compress", { method: "POST", body: formData });
+            if (!response.ok) {
+                const errData = await response.json().catch(() => ({}));
+                throw new Error(errData.error || "Compression failed.");
+            }
+            const blob = await response.blob();
+            const contentDisposition = response.headers.get("Content-Disposition");
+            const outputName = extractDownloadName(contentDisposition) || buildCompressedOutputName(compressFile.name);
+
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = outputName;
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            URL.revokeObjectURL(url);
+
+            closeCompressModal();
+        } catch (err) {
+            alert("Compression failed: " + err.message);
+        } finally {
+            btnCompressGo.disabled = false;
+            btnCompressGo.querySelector(".btn-text").textContent = "Compress File";
+        }
+    });
+
+    dropdownItems.forEach(item => {
+        item.addEventListener("click", (e) => {
+            e.preventDefault();
+            const format = item.dataset.format;
+            const [from, to] = format.split("-to-");
+            currentMode = "convert";
+
+            // Apply source-format filter on the file input
+            const accept = SOURCE_FORMAT_ACCEPT[from] || DEFAULT_ACCEPT;
+            fileInput.accept = accept;
+            pendingSourceFormat = from;
+
+            // Update dropzone hint to reflect the filter
+            const formatLabel = from.toUpperCase();
+            document.querySelector(".dropzone-formats").textContent =
+                `Filtered: ${formatLabel} files only — Max 50 MB`;
+
+            if (selectedFiles.length > 0) {
+                // Check if current files match the required source format
+                const incompatible = selectedFiles.filter(
+                    f => getExtension(f.name) !== from &&
+                         !(from === "md" && getExtension(f.name) === "markdown")
+                );
+                if (incompatible.length === 0) {
+                    // Files already compatible — pre-select target format
+                    const options = getCommonFormatOptions(selectedFiles);
+                    renderFormatOptions(options);
+                    const match = options.find(opt => opt.value === to);
+                    if (match) {
+                        const els = formatOptions.querySelectorAll(".format-option");
+                        els.forEach(el => {
+                            if (el.querySelector(".format-option-label").textContent === match.label) {
+                                selectFormat(el, match.value);
+                            }
+                        });
+                    }
+                } else {
+                    // Current files are wrong type — reset and prompt for correct ones
+                    selectedFiles = [];
+                    selectedFormat = null;
+                    fileInput.value = "";
+                    filePreview.classList.add("hidden");
+                    dropzone.style.display = "";
+                    formatOptions.innerHTML = "";
+                    updateActionButtons();
+                    fileInput.click();
+                }
+            } else {
+                fileInput.click();
+            }
+        });
+    });
+
+    function showInfo(title, message) {
+        // Reuse error overlay for simple info for now, but with neutral styling if possible
+        errorMessage.parentElement.querySelector("h3").textContent = title;
+        errorMessage.parentElement.querySelector("h3").style.color = "var(--accent-indigo)";
+        errorMessage.textContent = message;
+        errorOverlay.classList.remove("hidden");
+        // Update retry button text
+        btnRetry.querySelector(".btn-text").textContent = "Got it";
+    }
 
     async function submitFiles({
         endpoint,
@@ -364,6 +631,11 @@
     }
 
     async function startConversion() {
+        if (currentMode === "zip") {
+            await startZip();
+            return;
+        }
+
         if (!selectedFiles.length || !selectedFormat) {
             return;
         }
@@ -397,8 +669,25 @@
         });
     }
 
+    async function startZip() {
+        if (!selectedFiles.length) {
+            return;
+        }
+
+        await submitFiles({
+            endpoint: "/zip",
+            initialText: selectedFiles.length > 1 ? "Uploading files for archive…" : "Uploading file for archive…",
+            processingText: selectedFiles.length > 1 ? "Creating ZIP archive…" : "Creating ZIP archive…",
+            fallbackName: buildZipOutputName,
+            errorMessage: "ZIP creation failed. Please try again.",
+        });
+    }
+
     function showError(message) {
+        errorOverlay.querySelector("h3").textContent = "Conversion Failed";
+        errorOverlay.querySelector("h3").style.color = "var(--accent-red)";
         errorMessage.textContent = message;
+        btnRetry.querySelector(".btn-text").textContent = "Try Again";
         errorOverlay.classList.remove("hidden");
     }
 })();

@@ -24,6 +24,27 @@ logger = logging.getLogger(__name__)
 class FileManager:
     """Stateless helpers for file I/O used during conversions."""
 
+    @staticmethod
+    def _build_unique_archive_name(filename: str, seen: dict[str, int]) -> str:
+        """Return a stable archive member name, suffixing duplicates when needed."""
+        path = Path(filename)
+        candidate = path.name or "file"
+
+        if candidate not in seen:
+            seen[candidate] = 1
+            return candidate
+
+        stem = path.stem or "file"
+        suffix = path.suffix
+
+        while True:
+            duplicate_count = seen[candidate]
+            deduped = f"{stem}_{duplicate_count}{suffix}"
+            seen[candidate] = duplicate_count + 1
+            if deduped not in seen:
+                seen[deduped] = 1
+                return deduped
+
     def __init__(self, allowed_extensions: set[str]) -> None:
         """
         Args:
@@ -102,6 +123,7 @@ class FileManager:
         files: Iterable[Path],
         dest_dir: Path,
         archive_name: str = "docforge_batch.zip",
+        archive_names: Optional[Iterable[str]] = None,
     ) -> Path:
         """
         Bundle converted files into a ZIP archive for batch downloads.
@@ -109,11 +131,25 @@ class FileManager:
         Returns:
             Path to the generated archive.
         """
+        files = list(files)
+        archive_names_list = (
+            list(archive_names)
+            if archive_names is not None
+            else [file_path.name for file_path in files]
+        )
+
+        if len(files) != len(archive_names_list):
+            raise ValueError("Archive file list and archive name list must be the same length.")
+
         archive_path = dest_dir / generate_safe_filename(archive_name)
+        seen_names: dict[str, int] = {}
 
         with zipfile.ZipFile(archive_path, "w", compression=zipfile.ZIP_DEFLATED) as archive:
-            for file_path in files:
-                archive.write(file_path, arcname=file_path.name)
+            for file_path, member_name in zip(files, archive_names_list):
+                archive.write(
+                    file_path,
+                    arcname=self._build_unique_archive_name(member_name, seen_names),
+                )
 
         logger.info("Created archive → %s", archive_path)
         return archive_path

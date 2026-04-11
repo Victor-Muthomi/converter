@@ -14,6 +14,7 @@ from flask import Blueprint, current_app, jsonify, request, send_file
 from app.services.engine import ConversionEngine
 from app.services.file_manager import FileManager
 from app.services.merger import DocumentMerger
+from app.services.compressor import PdfCompressor
 from app.utils.exceptions import (
     ConversionError,
     DocForgeError,
@@ -146,4 +147,100 @@ def merge_documents():
 
     except Exception:
         logger.exception("Unexpected error in /merge")
+        return jsonify({"error": "An unexpected server error occurred."}), 500
+
+
+@api.route("/zip", methods=["POST"])
+def zip_documents():
+    """
+    Accept one or more uploaded documents and return them in a ZIP archive
+    without converting their file formats.
+    """
+    file_mgr: FileManager = current_app.config["FILE_MANAGER"]
+    upload_dir: Path = current_app.config["UPLOAD_FOLDER"]
+    output_dir: Path = current_app.config["OUTPUT_FOLDER"]
+
+    try:
+        uploaded_files = request.files.getlist("file")
+        original_names = file_mgr.validate_uploads(uploaded_files)
+        saved_paths = file_mgr.save_uploads(uploaded_files, upload_dir)
+
+        archive_path = file_mgr.create_archive(
+            saved_paths,
+            output_dir,
+            archive_name="docforge_files.zip",
+            archive_names=original_names,
+        )
+
+        return send_file(
+            archive_path,
+            as_attachment=True,
+            download_name="docforge_files.zip",
+        )
+
+    except InvalidFileError as exc:
+        logger.warning("Client error: %s", exc.message)
+        return jsonify({"error": exc.message}), 400
+
+    except DocForgeError as exc:
+        logger.error("DocForge error: %s", exc.message)
+        return jsonify({"error": exc.message}), 500
+
+    except Exception:
+        logger.exception("Unexpected error in /zip")
+        return jsonify({"error": "An unexpected server error occurred."}), 500
+
+
+# ── Compression endpoint ───────────────────────────────────────────────────
+
+@api.route("/compress", methods=["POST"])
+def compress_document():
+    """
+    Accept a single supported document upload and return a compressed version
+    in the same file format.
+
+    Form fields:
+        file:    The document file to compress (multipart file).
+        quality: Compression aggressiveness — ``high``, ``medium`` (default),
+                 or ``low``.  ``high`` = light stream compression;
+                 ``low`` = aggressive image recompression for PDFs.
+    """
+    file_mgr: FileManager = current_app.config["FILE_MANAGER"]
+    compressor: PdfCompressor = current_app.config["PDF_COMPRESSOR"]
+    upload_dir: Path = current_app.config["UPLOAD_FOLDER"]
+
+    try:
+        uploaded_files = request.files.getlist("file")
+        file_mgr.validate_uploads(uploaded_files)
+
+        if len(uploaded_files) != 1:
+            raise InvalidFileError("Compression accepts exactly one file at a time.")
+
+        quality = request.form.get("quality", "medium").strip().lower()
+        if quality not in ("high", "medium", "low"):
+            quality = "medium"
+
+        saved_paths = file_mgr.save_uploads(uploaded_files, upload_dir)
+        compressed_path = compressor.compress(saved_paths[0], quality=quality)
+
+        return send_file(
+            compressed_path,
+            as_attachment=True,
+            download_name=compressed_path.name,
+        )
+
+    except (InvalidFileError, UnsupportedConversionError) as exc:
+        logger.warning("Client error: %s", exc.message)
+        return jsonify({"error": exc.message}), 400
+
+    except ConversionError as exc:
+        logger.error("Compression error: %s", exc.message)
+        return jsonify({"error": exc.message}), 500
+
+    except DocForgeError as exc:
+        logger.error("DocForge error: %s", exc.message)
+        return jsonify({"error": exc.message}), 500
+
+    except Exception:
+        logger.exception("Unexpected error in /compress")
         return jsonify({"error": "An unexpected server error occurred."}), 500

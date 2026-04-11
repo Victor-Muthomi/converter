@@ -5,7 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DocForge — Document Converter</title>
-    <meta name="description" content="Convert documents between DOCX, PDF, HTML, Markdown, and TXT formats instantly with DocForge.">
+    <meta name="description"
+        content="Convert documents between DOCX, PDF, HTML, Markdown, and TXT formats instantly with DocForge.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
@@ -45,27 +46,120 @@
             <p class="tagline">Transform your documents in seconds</p>
         </header>
 
-        <!-- Supported formats ribbon -->
-        <div class="formats-ribbon">
-            <div class="format-badge">
-                <span class="format-dot docx"></span> DOCX → HTML / MD / PDF
+        <!-- Navbar -->
+        <nav class="navbar">
+            <div class="nav-links">
+                <div class="nav-item dropdown" id="convertDropdown">
+                    <button class="nav-link dropdown-toggle">
+                        Convert
+                        <svg class="chevron" width="12" height="12" viewBox="0 0 24 24" fill="none">
+                            <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                        </svg>
+                    </button>
+                    <div class="dropdown-menu">
+                        <div class="dropdown-group">
+                            <div class="group-label">Word & Office</div>
+                            <a href="#" class="dropdown-item" data-action="convert" data-format="docx-to-pdf">
+                                <span class="item-icon">📄</span>
+                                <div class="item-content">
+                                    <span class="item-title">DOCX to PDF</span>
+                                    <span class="item-desc">High fidelity conversion</span>
+                                </div>
+                            </a>
+                            <a href="#" class="dropdown-item" data-action="convert" data-format="docx-to-html">
+                                <span class="item-icon">🌐</span>
+                                <div class="item-content">
+                                    <span class="item-title">DOCX to HTML</span>
+                                    <span class="item-desc">Web-ready document</span>
+                                </div>
+                            </a>
+                            <a href="#" class="dropdown-item" data-action="convert" data-format="docx-to-md">
+                                <span class="item-icon">✍️</span>
+                                <div class="item-content">
+                                    <span class="item-title">DOCX to MD</span>
+                                    <span class="item-desc">Clean markdown content</span>
+                                </div>
+                            </a>
+                            <a href="#" class="dropdown-item" data-action="convert" data-format="pptx-to-pdf">
+                                <span class="item-icon">📊</span>
+                                <div class="item-content">
+                                    <span class="item-title">PPTX to PDF</span>
+                                    <span class="item-desc">Slides to document</span>
+                                </div>
+                            </a>
+                        </div>
+
+                        <div class="dropdown-group">
+                            <div class="group-label">PDF Tools</div>
+                            <a href="#" class="dropdown-item" data-action="convert" data-format="pdf-to-docx">
+                                <span class="item-icon">📝</span>
+                                <div class="item-content">
+                                    <span class="item-title">PDF to DOCX</span>
+                                    <span class="item-desc">Convert to Word</span>
+                                </div>
+                            </a>
+                            <a href="#" class="dropdown-item" data-action="convert" data-format="pdf-to-doc">
+                                <span class="item-icon">📘</span>
+                                <div class="item-content">
+                                    <span class="item-title">PDF to DOC</span>
+                                    <span class="item-desc">Legacy Word format</span>
+                                </div>
+                            </a>
+                            <a href="#" class="dropdown-item" data-action="convert" data-format="pdf-to-html">
+                                <span class="item-icon">🌐</span>
+                                <div class="item-content">
+                                    <span class="item-title">PDF to HTML</span>
+                                    <span class="item-desc">Export to web</span>
+                                </div>
+                            </a>
+                            <a href="#" class="dropdown-item" data-action="convert" data-format="pdf-to-md">
+                                <span class="item-icon">✍️</span>
+                                <div class="item-content">
+                                    <span class="item-title">PDF to MD</span>
+                                    <span class="item-desc">Extract text to MD</span>
+                                </div>
+                            </a>
+                        </div>
+
+                        <div class="dropdown-group">
+                            <div class="group-label">Web & Text</div>
+                            <a href="#" class="dropdown-item" data-action="convert" data-format="html-to-pdf">
+                                <span class="item-icon">📄</span>
+                                <div class="item-content">
+                                    <span class="item-title">HTML to PDF</span>
+                                    <span class="item-desc">Capture web pages</span>
+                                </div>
+                            </a>
+                            <a href="#" class="dropdown-item" data-action="convert" data-format="html-to-md">
+                                <span class="item-icon">✍️</span>
+                                <div class="item-content">
+                                    <span class="item-title">HTML to MD</span>
+                                    <span class="item-desc">Convert web to text</span>
+                                </div>
+                            </a>
+                            <a href="#" class="dropdown-item" data-action="convert" data-format="md-to-pdf">
+                                <span class="item-icon">📄</span>
+                                <div class="item-content">
+                                    <span class="item-title">MD to PDF</span>
+                                    <span class="item-desc">Render documentation</span>
+                                </div>
+                            </a>
+                            <a href="#" class="dropdown-item" data-action="convert" data-format="txt-to-pdf">
+                                <span class="item-icon">📄</span>
+                                <div class="item-content">
+                                    <span class="item-title">TXT to PDF</span>
+                                    <span class="item-desc">Plain text to document</span>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <a href="#" class="nav-link" id="navMerge">Merge</a>
+                <a href="#" class="nav-link" id="navZip">Zip</a>
+                <a href="#" class="nav-link" id="navCompress">Compress</a>
             </div>
-            <div class="format-badge">
-                <span class="format-dot pptx"></span> PPTX → PDF
-            </div>
-            <div class="format-badge">
-                <span class="format-dot pdf"></span> PDF → DOC / DOCX / HTML / MD
-            </div>
-            <div class="format-badge">
-                <span class="format-dot html"></span> HTML → MD / PDF
-            </div>
-            <div class="format-badge">
-                <span class="format-dot md"></span> MD → PDF
-            </div>
-            <div class="format-badge">
-                <span class="format-dot txt"></span> TXT → PDF
-            </div>
-        </div>
+        </nav>
 
         <!-- Main conversion card -->
         <main class="converter-card" id="converterCard">
@@ -90,7 +184,8 @@
                         <p class="dropzone-sublabel">or click to browse</p>
                         <p class="dropzone-formats">Supports: DOCX, PPTX, PDF, HTML, MD, TXT — Max 50 MB</p>
                     </div>
-                    <input type="file" id="fileInput" accept=".docx,.pptx,.pdf,.html,.md,.markdown,.txt" multiple hidden>
+                    <input type="file" id="fileInput" accept=".docx,.pptx,.pdf,.html,.md,.markdown,.txt" multiple
+                        hidden>
                 </div>
 
                 <!-- File preview (appears after files are selected) -->
@@ -135,12 +230,10 @@
                         <span class="btn-text" id="btnMergeText">Merge to PDF</span>
                         <span class="btn-icon">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                                <path d="M7 7l5 5 5-5" stroke="currentColor" stroke-width="2.5"
-                                    stroke-linecap="round" stroke-linejoin="round" />
-                                <path d="M12 12v7" stroke="currentColor" stroke-width="2.5"
-                                    stroke-linecap="round" />
-                                <path d="M6 19h12" stroke="currentColor" stroke-width="2.5"
-                                    stroke-linecap="round" />
+                                <path d="M7 7l5 5 5-5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                                    stroke-linejoin="round" />
+                                <path d="M12 12v7" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+                                <path d="M6 19h12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
                             </svg>
                         </span>
                     </button>
@@ -212,6 +305,84 @@
         <footer class="footer">
             <p>DocForge &mdash; Open-source document conversion engine</p>
         </footer>
+    </div>
+
+
+    <!-- Compress Modal -->
+    <div class="compress-modal hidden" id="compressModal">
+        <div class="compress-modal-backdrop" id="compressModalBackdrop"></div>
+        <div class="compress-modal-content">
+            <button class="compress-modal-close" id="compressModalClose" aria-label="Close">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                    <line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    <line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+            </button>
+
+            <div class="compress-header">
+                <div class="compress-icon">🗜️</div>
+                <h2>Compress Document</h2>
+                <p class="compress-subtitle">Reduce file size while keeping the original document format</p>
+            </div>
+
+            <!-- Quality selector -->
+            <div class="quality-selector">
+                <label class="quality-option" data-quality="high">
+                    <input type="radio" name="quality" value="high">
+                    <div class="quality-card">
+                        <span class="quality-emoji">🟢</span>
+                        <span class="quality-title">High Quality</span>
+                        <span class="quality-desc">Light compression, best fidelity</span>
+                    </div>
+                </label>
+                <label class="quality-option" data-quality="medium">
+                    <input type="radio" name="quality" value="medium" checked>
+                    <div class="quality-card selected">
+                        <span class="quality-emoji">🟡</span>
+                        <span class="quality-title">Balanced</span>
+                        <span class="quality-desc">Good size reduction, great quality</span>
+                    </div>
+                </label>
+                <label class="quality-option" data-quality="low">
+                    <input type="radio" name="quality" value="low">
+                    <div class="quality-card">
+                        <span class="quality-emoji">🔴</span>
+                        <span class="quality-title">Max Compression</span>
+                        <span class="quality-desc">Smallest size, reduced image quality</span>
+                    </div>
+                </label>
+            </div>
+
+            <!-- Drop zone inside modal -->
+            <div class="compress-dropzone" id="compressDropzone">
+                <div class="compress-dropzone-content">
+                    <svg width="40" height="40" viewBox="0 0 48 48" fill="none">
+                        <path d="M24 32V12M24 12L16 20M24 12L32 20" stroke="currentColor" stroke-width="2.5"
+                            stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M8 32v4a4 4 0 004 4h24a4 4 0 004-4v-4" stroke="currentColor" stroke-width="2.5"
+                            stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <p class="compress-drop-label">Drop your document here</p>
+                    <p class="compress-drop-sub">or click to browse — PDF, DOCX, PPTX — Max 50 MB</p>
+                </div>
+                <input type="file" id="compressFileInput" accept=".docx,.pptx,.pdf" hidden>
+            </div>
+
+            <div class="compress-file-preview hidden" id="compressFilePreview">
+                <span class="compress-file-name" id="compressFileName"></span>
+                <span class="compress-file-size" id="compressFileSize"></span>
+            </div>
+
+            <button class="btn-convert btn-compress-go" id="btnCompressGo" disabled>
+                <span class="btn-text">Compress File</span>
+                <span class="btn-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                        <path d="M12 2v10m0 0l-3-3m3 3l3-3M5 17v2a2 2 0 002 2h10a2 2 0 002-2v-2"
+                            stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </span>
+            </button>
+        </div>
     </div>
 
     <script src="{{ url_for('web.static', filename='js/app.js') }}"></script>

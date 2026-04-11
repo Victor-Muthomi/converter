@@ -28,6 +28,7 @@ from app.converters import (
 )
 from app.routes import api
 from app.web import web
+from app.services.compressor import PdfCompressor
 from app.services.engine import ConversionEngine
 from app.services.file_manager import FileManager
 from app.services.merger import DocumentMerger
@@ -88,11 +89,13 @@ def create_app() -> Flask:
     file_manager = FileManager(allowed_extensions=Config.ALLOWED_INPUT_EXTENSIONS)
     engine = ConversionEngine(registry=registry, output_dir=Config.OUTPUT_FOLDER)
     merger = DocumentMerger(engine=engine, output_dir=Config.OUTPUT_FOLDER)
+    compressor = PdfCompressor(output_dir=Config.OUTPUT_FOLDER, engine=engine)
 
     # Stash services on the app so routes can access them via current_app
     app.config["CONVERSION_ENGINE"] = engine
     app.config["FILE_MANAGER"] = file_manager
     app.config["DOCUMENT_MERGER"] = merger
+    app.config["PDF_COMPRESSOR"] = compressor
 
     # ── Routes ─────────────────────────────────────────────────────────────
     app.register_blueprint(api)
