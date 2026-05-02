@@ -12,6 +12,7 @@
     /* ── Format mapping ──────────────────────────────────────────────── */
     const CONVERSIONS = {
         docx: [
+            { value: "epub", label: "EPUB", icon: "📚", desc: "E-book Format" },
             { value: "html", label: "HTML", icon: "🌐", desc: "Standalone Web Document" },
             { value: "md", label: "Markdown", icon: "✍️", desc: "Plain Text Markdown" },
             { value: "pdf", label: "PDF", icon: "📄", desc: "Portable Document" },
@@ -23,12 +24,24 @@
             { value: "html", label: "HTML", icon: "🌐", desc: "Web Document" },
             { value: "md", label: "Markdown", icon: "✍️", desc: "Plain Text Markdown" },
         ],
-        html: [
+        epub: [
+            { value: "html", label: "HTML", icon: "🌐", desc: "Web Document" },
             { value: "md", label: "Markdown", icon: "✍️", desc: "Plain Text Markdown" },
             { value: "pdf", label: "PDF", icon: "📄", desc: "Portable Document" },
         ],
-        md: [{ value: "pdf", label: "PDF", icon: "📄", desc: "Portable Document" }],
-        txt: [{ value: "pdf", label: "PDF", icon: "📄", desc: "Portable Document" }],
+        html: [
+            { value: "epub", label: "EPUB", icon: "📚", desc: "E-book Format" },
+            { value: "md", label: "Markdown", icon: "✍️", desc: "Plain Text Markdown" },
+            { value: "pdf", label: "PDF", icon: "📄", desc: "Portable Document" },
+        ],
+        md: [
+            { value: "epub", label: "EPUB", icon: "📚", desc: "E-book Format" },
+            { value: "pdf", label: "PDF", icon: "📄", desc: "Portable Document" },
+        ],
+        txt: [
+            { value: "epub", label: "EPUB", icon: "📚", desc: "E-book Format" },
+            { value: "pdf", label: "PDF", icon: "📄", desc: "Portable Document" },
+        ],
     };
 
     /* ── DOM refs ─────────────────────────────────────────────────────── */
@@ -37,6 +50,7 @@
     const filePreview = document.getElementById("filePreview");
     const fileSummary = document.getElementById("fileSummary");
     const fileList = document.getElementById("fileList");
+    const fileSortSelect = document.getElementById("fileSortSelect");
     const btnRemove = document.getElementById("btnRemove");
     const formatOptions = document.getElementById("formatOptions");
     const btnConvert = document.getElementById("btnConvert");
@@ -60,13 +74,16 @@
 
     /* ── State ────────────────────────────────────────────────────────── */
     let selectedFiles = [];
+    let uploadedFiles = [];
     let selectedFormat = null;
     let pendingSourceFormat = null; // set when user picks a conversion from navbar
     let currentMode = "convert";
+    let selectedSort = "original";
 
     /* ── Source-format filter map ─────────────────────────────────────── */
     const SOURCE_FORMAT_ACCEPT = {
         docx: ".docx",
+        epub: ".epub",
         pptx: ".pptx",
         pdf: ".pdf",
         html: ".html",
@@ -74,8 +91,8 @@
         txt: ".txt",
     };
 
-    const DEFAULT_ACCEPT = ".docx,.pptx,.pdf,.html,.md,.markdown,.txt";
-    const DEFAULT_FORMATS_TEXT = "Supports: DOCX, PPTX, PDF, HTML, MD, TXT — Max 50 MB";
+    const DEFAULT_ACCEPT = ".docx,.epub,.pptx,.pdf,.html,.md,.markdown,.txt";
+    const DEFAULT_FORMATS_TEXT = "Supports: DOCX, EPUB, PPTX, PDF, HTML, MD, TXT - Max 50 MB";
 
     /* ── Helpers ──────────────────────────────────────────────────────── */
     function normalizeExtension(ext) {
@@ -126,6 +143,43 @@
 
     function canMergeFiles(files) {
         return files.length > 1 && files.every(canConvertFileToPdf);
+    }
+
+    function compareNames(a, b) {
+        return a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: "base" });
+    }
+
+    function compareExtensions(a, b) {
+        const extCompare = getExtension(a.name).localeCompare(getExtension(b.name), undefined, {
+            sensitivity: "base",
+        });
+        return extCompare || compareNames(a, b);
+    }
+
+    function applySelectedSort() {
+        const files = [...uploadedFiles];
+
+        switch (selectedSort) {
+            case "name-asc":
+                files.sort(compareNames);
+                break;
+            case "name-desc":
+                files.sort((a, b) => compareNames(b, a));
+                break;
+            case "size-asc":
+                files.sort((a, b) => a.size - b.size || compareNames(a, b));
+                break;
+            case "size-desc":
+                files.sort((a, b) => b.size - a.size || compareNames(a, b));
+                break;
+            case "type-asc":
+                files.sort(compareExtensions);
+                break;
+            default:
+                break;
+        }
+
+        selectedFiles = files;
     }
 
     function updateActionButtons() {
@@ -189,6 +243,8 @@
         const countLabel = selectedFiles.length === 1 ? "1 file selected" : `${selectedFiles.length} files selected`;
 
         fileSummary.textContent = `${countLabel} • ${formatBytes(totalBytes)}`;
+        fileSortSelect.disabled = selectedFiles.length < 2;
+        fileSortSelect.value = selectedSort;
         fileList.innerHTML = "";
 
         selectedFiles.forEach((file) => {
@@ -248,7 +304,7 @@
 
         if (unsupported.length) {
             const invalidNames = unsupported.map((file) => `"${file.name}"`).join(", ");
-            showError(`Unsupported file type in ${invalidNames}. Please upload DOCX, PPTX, PDF, HTML, Markdown, or TXT files.`);
+            showError(`Unsupported file type in ${invalidNames}. Please upload DOCX, EPUB, PPTX, PDF, HTML, Markdown, or TXT files.`);
             return;
         }
 
@@ -258,7 +314,9 @@
             return;
         }
 
-        selectedFiles = files;
+        uploadedFiles = files;
+        selectedSort = "original";
+        applySelectedSort();
         selectedFormat = null;
 
         renderFilePreview();
@@ -271,12 +329,20 @@
     }
 
     btnRemove.addEventListener("click", resetUI);
+    fileSortSelect.addEventListener("change", (event) => {
+        selectedSort = event.target.value;
+        applySelectedSort();
+        renderFilePreview();
+        updateActionButtons();
+    });
 
     function resetUI() {
         selectedFiles = [];
+        uploadedFiles = [];
         selectedFormat = null;
         pendingSourceFormat = null;
         currentMode = "convert";
+        selectedSort = "original";
         fileInput.value = "";
 
         // Restore default file filter
@@ -286,6 +352,8 @@
         filePreview.classList.add("hidden");
         dropzone.style.display = "";
         fileSummary.textContent = "";
+        fileSortSelect.value = "original";
+        fileSortSelect.disabled = true;
         fileList.innerHTML = "";
         formatOptions.innerHTML = "";
 
@@ -536,10 +604,14 @@
                 } else {
                     // Current files are wrong type — reset and prompt for correct ones
                     selectedFiles = [];
+                    uploadedFiles = [];
                     selectedFormat = null;
+                    selectedSort = "original";
                     fileInput.value = "";
                     filePreview.classList.add("hidden");
                     dropzone.style.display = "";
+                    fileSortSelect.value = "original";
+                    fileSortSelect.disabled = true;
                     formatOptions.innerHTML = "";
                     updateActionButtons();
                     fileInput.click();

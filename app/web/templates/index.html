@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DocForge — Document Converter</title>
     <meta name="description"
-        content="Convert documents between DOCX, PDF, HTML, Markdown, and TXT formats instantly with DocForge.">
+        content="Convert documents between DOCX, PDF, HTML, Markdown, TXT, and EPUB formats instantly with DocForge.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
@@ -81,6 +81,13 @@
                                     <span class="item-desc">Clean markdown content</span>
                                 </div>
                             </a>
+                            <a href="#" class="dropdown-item" data-action="convert" data-format="docx-to-epub">
+                                <span class="item-icon">📚</span>
+                                <div class="item-content">
+                                    <span class="item-title">DOCX to EPUB</span>
+                                    <span class="item-desc">Export to e-book</span>
+                                </div>
+                            </a>
                             <a href="#" class="dropdown-item" data-action="convert" data-format="pptx-to-pdf">
                                 <span class="item-icon">📊</span>
                                 <div class="item-content">
@@ -124,6 +131,27 @@
 
                         <div class="dropdown-group">
                             <div class="group-label">Web & Text</div>
+                            <a href="#" class="dropdown-item" data-action="convert" data-format="epub-to-pdf">
+                                <span class="item-icon">📄</span>
+                                <div class="item-content">
+                                    <span class="item-title">EPUB to PDF</span>
+                                    <span class="item-desc">E-book to document</span>
+                                </div>
+                            </a>
+                            <a href="#" class="dropdown-item" data-action="convert" data-format="epub-to-html">
+                                <span class="item-icon">🌐</span>
+                                <div class="item-content">
+                                    <span class="item-title">EPUB to HTML</span>
+                                    <span class="item-desc">Convert e-book to web</span>
+                                </div>
+                            </a>
+                            <a href="#" class="dropdown-item" data-action="convert" data-format="epub-to-md">
+                                <span class="item-icon">✍️</span>
+                                <div class="item-content">
+                                    <span class="item-title">EPUB to MD</span>
+                                    <span class="item-desc">Extract e-book to markdown</span>
+                                </div>
+                            </a>
                             <a href="#" class="dropdown-item" data-action="convert" data-format="html-to-pdf">
                                 <span class="item-icon">📄</span>
                                 <div class="item-content">
@@ -138,6 +166,13 @@
                                     <span class="item-desc">Convert web to text</span>
                                 </div>
                             </a>
+                            <a href="#" class="dropdown-item" data-action="convert" data-format="html-to-epub">
+                                <span class="item-icon">📚</span>
+                                <div class="item-content">
+                                    <span class="item-title">HTML to EPUB</span>
+                                    <span class="item-desc">Publish as e-book</span>
+                                </div>
+                            </a>
                             <a href="#" class="dropdown-item" data-action="convert" data-format="md-to-pdf">
                                 <span class="item-icon">📄</span>
                                 <div class="item-content">
@@ -145,11 +180,25 @@
                                     <span class="item-desc">Render documentation</span>
                                 </div>
                             </a>
+                            <a href="#" class="dropdown-item" data-action="convert" data-format="md-to-epub">
+                                <span class="item-icon">📚</span>
+                                <div class="item-content">
+                                    <span class="item-title">MD to EPUB</span>
+                                    <span class="item-desc">Documentation as e-book</span>
+                                </div>
+                            </a>
                             <a href="#" class="dropdown-item" data-action="convert" data-format="txt-to-pdf">
                                 <span class="item-icon">📄</span>
                                 <div class="item-content">
                                     <span class="item-title">TXT to PDF</span>
                                     <span class="item-desc">Plain text to document</span>
+                                </div>
+                            </a>
+                            <a href="#" class="dropdown-item" data-action="convert" data-format="txt-to-epub">
+                                <span class="item-icon">📚</span>
+                                <div class="item-content">
+                                    <span class="item-title">TXT to EPUB</span>
+                                    <span class="item-desc">Plain text as e-book</span>
                                 </div>
                             </a>
                         </div>
@@ -182,15 +231,28 @@
                         </div>
                         <p class="dropzone-label">Drag & drop your files here</p>
                         <p class="dropzone-sublabel">or click to browse</p>
-                        <p class="dropzone-formats">Supports: DOCX, PPTX, PDF, HTML, MD, TXT — Max 50 MB</p>
+                        <p class="dropzone-formats">Supports: DOCX, EPUB, PPTX, PDF, HTML, MD, TXT - Max 50 MB</p>
                     </div>
-                    <input type="file" id="fileInput" accept=".docx,.pptx,.pdf,.html,.md,.markdown,.txt" multiple
+                    <input type="file" id="fileInput" accept=".docx,.epub,.pptx,.pdf,.html,.md,.markdown,.txt" multiple
                         hidden>
                 </div>
 
                 <!-- File preview (appears after files are selected) -->
                 <div class="file-preview hidden" id="filePreview">
-                    <p class="file-summary" id="fileSummary"></p>
+                    <div class="file-preview-toolbar">
+                        <p class="file-summary" id="fileSummary"></p>
+                        <label class="file-sort" for="fileSortSelect">
+                            <span class="file-sort-label">Sort files</span>
+                            <select class="file-sort-select" id="fileSortSelect" aria-label="Sort selected files" disabled>
+                                <option value="original">Original order</option>
+                                <option value="name-asc">Name A-Z</option>
+                                <option value="name-desc">Name Z-A</option>
+                                <option value="size-asc">Smallest first</option>
+                                <option value="size-desc">Largest first</option>
+                                <option value="type-asc">Type A-Z</option>
+                            </select>
+                        </label>
+                    </div>
                     <div class="file-list" id="fileList"></div>
                     <button class="btn-remove" id="btnRemove" title="Remove file">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none">

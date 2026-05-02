@@ -1,5 +1,6 @@
 # DocForge Python dependencies
 # System dependency: LibreOffice (install via package manager, not pip)
+# System dependency: Pandoc (required for Markdown/HTML/DOCX/TXT -> EPUB/MD)
 
 Flask>=3.0
 pdf2docx>=0.5.8

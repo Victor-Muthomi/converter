@@ -14,16 +14,23 @@ from flask import Flask
 from app.config import Config
 from app.converters import (
     DocxToHtmlConverter,
+    DocxToEpubConverter,
     DocxToMarkdownConverter,
     DocxToPdfConverter,
+    EpubToHtmlConverter,
+    EpubToMarkdownConverter,
+    EpubToPdfConverter,
+    HtmlToEpubConverter,
     HtmlToMarkdownConverter,
     HtmlToPdfConverter,
+    MarkdownToEpubConverter,
     MarkdownToPdfConverter,
     PdfToDocConverter,
     PdfToHtmlConverter,
     PdfToDocxConverter,
     PdfToMarkdownConverter,
     PptxToPdfConverter,
+    TxtToEpubConverter,
     TxtToPdfConverter,
 )
 from app.routes import api
@@ -72,9 +79,15 @@ def create_app() -> Flask:
     # ── Converter registry ─────────────────────────────────────────────────
     registry = ConverterRegistry()
     registry.register(DocxToHtmlConverter())
+    registry.register(DocxToEpubConverter())
     registry.register(DocxToMarkdownConverter())
     registry.register(DocxToPdfConverter())
+    registry.register(EpubToHtmlConverter())
+    registry.register(EpubToMarkdownConverter())
+    registry.register(EpubToPdfConverter())
+    registry.register(HtmlToEpubConverter())
     registry.register(HtmlToMarkdownConverter())
+    registry.register(MarkdownToEpubConverter())
     registry.register(MarkdownToPdfConverter())
     registry.register(PdfToDocConverter())
     registry.register(PdfToHtmlConverter())
@@ -82,6 +95,7 @@ def create_app() -> Flask:
     registry.register(PdfToMarkdownConverter())
     registry.register(HtmlToPdfConverter())
     registry.register(PptxToPdfConverter())
+    registry.register(TxtToEpubConverter())
     registry.register(TxtToPdfConverter())
     logger.info("Registered %d converter(s): %s", len(registry), registry.list_conversions())
 
