@@ -17,6 +17,7 @@ from app.converters import (
     DocxToEpubConverter,
     DocxToMarkdownConverter,
     DocxToPdfConverter,
+    EpubToDocxConverter,
     EpubToHtmlConverter,
     EpubToMarkdownConverter,
     EpubToPdfConverter,
@@ -82,6 +83,7 @@ def create_app() -> Flask:
     registry.register(DocxToEpubConverter())
     registry.register(DocxToMarkdownConverter())
     registry.register(DocxToPdfConverter())
+    registry.register(EpubToDocxConverter())
     registry.register(EpubToHtmlConverter())
     registry.register(EpubToMarkdownConverter())
     registry.register(EpubToPdfConverter())

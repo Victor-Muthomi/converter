@@ -10,6 +10,7 @@ from app.converters.docx_to_html import DocxToHtmlConverter
 from app.converters.docx_to_epub import DocxToEpubConverter
 from app.converters.docx_to_md import DocxToMarkdownConverter
 from app.converters.docx_to_pdf import DocxToPdfConverter
+from app.converters.epub_to_docx import EpubToDocxConverter
 from app.converters.epub_to_html import EpubToHtmlConverter
 from app.converters.epub_to_md import EpubToMarkdownConverter
 from app.converters.epub_to_pdf import EpubToPdfConverter
@@ -32,6 +33,7 @@ __all__ = [
     "DocxToEpubConverter",
     "DocxToMarkdownConverter",
     "DocxToPdfConverter",
+    "EpubToDocxConverter",
     "EpubToHtmlConverter",
     "EpubToMarkdownConverter",
     "EpubToPdfConverter",

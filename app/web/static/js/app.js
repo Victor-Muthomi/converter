@@ -25,6 +25,7 @@
             { value: "md", label: "Markdown", icon: "✍️", desc: "Plain Text Markdown" },
         ],
         epub: [
+            { value: "docx", label: "DOCX", icon: "📝", desc: "Word Document" },
             { value: "html", label: "HTML", icon: "🌐", desc: "Web Document" },
             { value: "md", label: "Markdown", icon: "✍️", desc: "Plain Text Markdown" },
             { value: "pdf", label: "PDF", icon: "📄", desc: "Portable Document" },
